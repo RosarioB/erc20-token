@@ -47,7 +47,7 @@ describe("GLDToken contract", () => {
           expect(addr2Balance).to.equal(50);
         });
     
-        it("Should fail if sender doesn't have enough tokens", async function () {
+        it("Should fail if sender doesn't have enough tokens", async () => {
           const initialOwnerBalance = await gldToken.balanceOf(owner.address);
           await expect(
             gldToken.connect(addr1).transfer(owner.address, 1)
@@ -58,7 +58,7 @@ describe("GLDToken contract", () => {
           );
         });
     
-        it("Should update balances after transfers", async function () {
+        it("Should update balances after transfers", async () => {
           const initialOwnerBalance: bigint = await gldToken.balanceOf(owner.address);
           await gldToken.transfer(addr1.address, 100);
           await gldToken.transfer(addr2.address, 50);
