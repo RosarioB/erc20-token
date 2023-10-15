@@ -11,6 +11,7 @@ describe("GLDToken contract", () => {
     let addr1: HardhatEthersSigner;
     let addr2: HardhatEthersSigner;
     const TOKEN_CAP: number = 100_000_000;
+    const TOKEN_SIZE: bigint = 10n ** 18n;
 
     beforeEach(async () => {
         Token = await ethers.getContractFactory("GLDToken");
@@ -29,7 +30,7 @@ describe("GLDToken contract", () => {
         });
     
         it("Should set the max capped supply to the argument provided during deployment", async function () {
-          const cap = await gldToken.cap();
+          const cap: bigint = await gldToken.cap();
           expect(Number(formatEther(cap))).to.equal(TOKEN_CAP);
         });
     
@@ -74,14 +75,15 @@ describe("GLDToken contract", () => {
       });
 
       describe("Minting new tokens", () => {
-        it("Should mint new tokens", async () => {
-          await gldToken.mint(addr1.address, 25_000);
-          const addr1Balance = await gldToken.balanceOf(addr1.address);
-          expect(addr1Balance).to.equal(50);
-    
-          await gldToken.connect(addr1).transfer(addr2.address, 50);
-          const addr2Balance = await gldToken.balanceOf(addr2.address);
-          expect(addr2Balance).to.equal(50);
+        it("Should mint new tokens in the owner's address", async () => {
+          await gldToken.mint(owner.address, 25_000_000n * TOKEN_SIZE);
+          const ownerBalance: bigint = await gldToken.balanceOf(owner.address);
+          expect(ownerBalance).to.equal(95_000_000n * TOKEN_SIZE);
         });
-      }
+        it("Should fail because we are exceeding the token's cap", async () => {
+          await expect(
+            gldToken.mint(owner.address, 35_000_000n * TOKEN_SIZE)
+          ).to.be.revertedWith("ERC20Capped: cap exceeded");
+        });
+      });
 });
