@@ -20,70 +20,59 @@ describe("GLDToken contract", () => {
     });
 
     describe("Deployment", () => {
-        it("Should set the right owner", async () => {
-          expect(await gldToken.owner()).to.equal(owner.address);
-        });
-    
-        it("Should assign the total supply of tokens to the owner", async function () {
-          const ownerBalance = await gldToken.balanceOf(owner.address);
-          expect(await gldToken.totalSupply()).to.equal(ownerBalance);
-        });
-    
-        it("Should set the max capped supply to the argument provided during deployment", async function () {
-          const cap: bigint = await gldToken.cap();
-          expect(Number(formatEther(cap))).to.equal(TOKEN_CAP);
-        });
-    
+      it("Should set the right owner", async () => {
+        expect(await gldToken.owner()).to.equal(owner.address);
       });
-
-      describe("Transactions", () => {
-        it("Should transfer tokens between accounts", async () => {
-          await gldToken.transfer(addr1.address, 50);
-          const addr1Balance = await gldToken.balanceOf(addr1.address);
-          expect(addr1Balance).to.equal(50);
-    
-          await gldToken.connect(addr1).transfer(addr2.address, 50);
-          const addr2Balance = await gldToken.balanceOf(addr2.address);
-          expect(addr2Balance).to.equal(50);
-        });
-    
-        it("Should fail if sender doesn't have enough tokens", async () => {
-          const initialOwnerBalance = await gldToken.balanceOf(owner.address);
-          await expect(
-            gldToken.connect(addr1).transfer(owner.address, 1)
-          ).to.be.revertedWith("ERC20: transfer amount exceeds balance");
-    
-          expect(await gldToken.balanceOf(owner.address)).to.equal(
-            initialOwnerBalance
-          );
-        });
-    
-        it("Should update balances after transfers", async () => {
-          const initialOwnerBalance: bigint = await gldToken.balanceOf(owner.address);
-          await gldToken.transfer(addr1.address, 100);
-          await gldToken.transfer(addr2.address, 50);
-    
-          const finalOwnerBalance = await gldToken.balanceOf(owner.address);
-          expect(finalOwnerBalance).to.equal(initialOwnerBalance - 150n);
-    
-          const addr1Balance = await gldToken.balanceOf(addr1.address);
-          expect(addr1Balance).to.equal(100);
-    
-          const addr2Balance = await gldToken.balanceOf(addr2.address);
-          expect(addr2Balance).to.equal(50);
-        });
+  
+      it("Should assign the total supply of tokens to the owner", async () => {
+        const ownerBalance = await gldToken.balanceOf(owner.address);
+        expect(await gldToken.totalSupply()).to.equal(ownerBalance);
       });
+    });
 
-      describe("Minting new tokens", () => {
-        it("Should mint new tokens in the owner's address", async () => {
-          await gldToken.mint(owner.address, 25_000_000n * TOKEN_SIZE);
+    describe("Transactions", () => {
+      it("Should transfer tokens between accounts", async () => {
+        await gldToken.transfer(addr1.address, 50);
+        const addr1Balance = await gldToken.balanceOf(addr1.address);
+        expect(addr1Balance).to.equal(50);
+  
+        await gldToken.connect(addr1).transfer(addr2.address, 50);
+        const addr2Balance = await gldToken.balanceOf(addr2.address);
+        expect(addr2Balance).to.equal(50);
+      });
+    
+      it("Should fail if sender doesn't have enough tokens", async () => {
+        const initialOwnerBalance = await gldToken.balanceOf(owner.address);
+        await expect(
+          gldToken.connect(addr1).transfer(owner.address, 1)
+        ).to.be.revertedWith("ERC20: transfer amount exceeds balance");
+  
+        expect(await gldToken.balanceOf(owner.address)).to.equal(
+          initialOwnerBalance
+        );
+      });
+    
+      it("Should update balances after transfers", async () => {
+        const initialOwnerBalance: bigint = await gldToken.balanceOf(owner.address);
+        await gldToken.transfer(addr1.address, 100);
+        await gldToken.transfer(addr2.address, 50);
+  
+        const finalOwnerBalance = await gldToken.balanceOf(owner.address);
+        expect(finalOwnerBalance).to.equal(initialOwnerBalance - 150n);
+  
+        const addr1Balance = await gldToken.balanceOf(addr1.address);
+        expect(addr1Balance).to.equal(100);
+  
+        const addr2Balance = await gldToken.balanceOf(addr2.address);
+        expect(addr2Balance).to.equal(50);
+      });
+    });
+
+    describe("Burning tokens", () => {
+        it("Should burn tokens from the owner's address", async () => {
+          await gldToken.burn(25_000_000n * TOKEN_SIZE);
           const ownerBalance: bigint = await gldToken.balanceOf(owner.address);
-          expect(ownerBalance).to.equal(95_000_000n * TOKEN_SIZE);
+          expect(ownerBalance).to.equal(45_000_000n * TOKEN_SIZE);
         });
-        it("Should fail because we are exceeding the token's cap", async () => {
-          await expect(
-            gldToken.mint(owner.address, 35_000_000n * TOKEN_SIZE)
-          ).to.be.revertedWith("ERC20Capped: cap exceeded");
-        });
-      });
+    });
 });
