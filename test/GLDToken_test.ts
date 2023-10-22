@@ -12,6 +12,7 @@ describe("GLDToken contract", () => {
     let addr2: HardhatEthersSigner;
     const TOKEN_CAP: number = 100_000_000;
     const TOKEN_BLOCK_REWARD: number = 50;
+    const DECIMALS : bigint = 10n ** 18n;
 
     beforeEach(async () => {
         Token = await ethers.getContractFactory("GLDToken");
@@ -86,5 +87,20 @@ describe("GLDToken contract", () => {
           const addr2Balance = await gldToken.balanceOf(addr2.address);
           expect(addr2Balance).to.equal(50);
         });
+
+        it("Test miner reward", async () => {
+          await gldToken.transfer(addr1.address, 100);
+          const blockCoinbaseAddress: string = "0xc014ba5ec014ba5ec014ba5ec014ba5ec014ba5e"; // The address used as coinbase in new blocks in HardHat https://hardhat.org/hardhat-network/docs/reference#:~:text=%23-,coinbase,-The%20address%20used
+          const blockCoinbaseBalance: bigint = await gldToken.balanceOf(blockCoinbaseAddress);
+          expect(blockCoinbaseBalance).to.equal(BigInt(TOKEN_BLOCK_REWARD) * DECIMALS);
+        })
     });
+
+    describe("Burning tokens", () => {
+      it("Should burn tokens from the owner's address", async () => {
+        await gldToken.burn(25_000_000n * DECIMALS);
+        const ownerBalance: bigint = await gldToken.balanceOf(owner.address);
+        expect(ownerBalance).to.equal(45_000_000n * DECIMALS);
+      });
+  });
 });
