@@ -14,4 +14,8 @@ contract GLDToken is ERC20 {
         owner = payable(msg.sender); 
         _mint(owner, TOKEN_SUPPLY * TOKEN_SIZE);
     }
+
+    function mintToken(address receiver, uint amount) public {
+        _mint(receiver, amount * TOKEN_SIZE);
+    }
 }
