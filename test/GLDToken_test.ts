@@ -1,11 +1,10 @@
-import { expect } from "chai"; // serve per fare delle asserzioni e può essere accompagnata a qualsiasi testing framework
-import { ethers } from "hardhat"; // hre è l'HardhatRuntimeEnvironment, ci serve perchè contiene una versione della libreria ether.js che ci serve per interagire col nostro smart contract
+import { expect } from "chai";
+import { ethers } from "hardhat";
 import { formatEther } from "ethers";
 import { GLDToken, GLDToken__factory } from "../typechain-types";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 
 describe("GLDToken contract", () => {
-    // global vars
     let Token: GLDToken__factory;
     let gldToken: GLDToken;
     let owner: HardhatEthersSigner;
@@ -14,40 +13,34 @@ describe("GLDToken contract", () => {
     const TOKEN_CAP: number = 100_000_000;
     const TOKEN_BLOCK_REWARD: number = 50;
 
-    // qui istanziamo il contratto GLDToken
     beforeEach(async () => {
-        // Get the ContractFactory and Signers here.
         Token = await ethers.getContractFactory("GLDToken");
-        // Qua stiamo settando un paio di wallets, incluso l'owner wallet da usare nei test
         [owner, addr1, addr2] = await ethers.getSigners();
-        // Qui stiamo deployando il contratto
         gldToken = await Token.deploy(TOKEN_CAP, TOKEN_BLOCK_REWARD);
     });
 
     describe("Deployment", () => {
-        // qui stiamo verificando che l'owner è colui che ha deployato il contratto
         it("Should set the right owner", async () => {
           expect(await gldToken.owner()).to.equal(owner.address);
         });
     
-        // qui ci stiamo assicurando che la total supply è uguale alla owner balance
-        it("Should assign the total supply of tokens to the owner", async function () {
+        it("Should assign the total supply of tokens to the owner", async () => {
           const ownerBalance = await gldToken.balanceOf(owner.address);
           expect(await gldToken.totalSupply()).to.equal(ownerBalance);
         });
     
-        it("Should set the max capped supply to the argument provided during deployment", async function () {
+        it("Should set the max capped supply to the argument provided during deployment", async () => {
           const cap = await gldToken.cap();
           expect(Number(formatEther(cap))).to.equal(TOKEN_CAP);
         });
     
-        it("Should set the blockReward to the argument provided during deployment", async function () {
+        it("Should set the blockReward to the argument provided during deployment", async () => {
           const blockReward = await gldToken.blockReward();
           expect(Number(formatEther(blockReward))).to.equal(TOKEN_BLOCK_REWARD);
         });
-      });
+    });
 
-      describe("Transactions", () => {
+    describe("Transactions", () => {
         it("Should transfer tokens between accounts", async () => {
           // Transfer 50 tokens from owner to addr1
           await gldToken.transfer(addr1.address, 50);
@@ -61,13 +54,12 @@ describe("GLDToken contract", () => {
           expect(addr2Balance).to.equal(50);
         });
     
-        it("Should fail if sender doesn't have enough tokens", async function () {
+        it("Should fail if sender doesn't have enough tokens", async () => {
           const initialOwnerBalance = await gldToken.balanceOf(owner.address);
           // Try to send 1 token from addr1 (0 tokens) to owner (1000000 tokens).
-          // `require` will evaluate false and revert the transaction.
           await expect(
             gldToken.connect(addr1).transfer(owner.address, 1)
-          ).to.be.revertedWith("ERC20: transfer amount exceeds balance");
+          ).to.be.revertedWithCustomError;
     
           // Owner balance shouldn't have changed.
           expect(await gldToken.balanceOf(owner.address)).to.equal(
@@ -75,9 +67,7 @@ describe("GLDToken contract", () => {
           );
         });
     
-        // Questo test fa due transazioni una dopo l'altra e si assicura che le balance di entrambi
-        // i wallet vengano aggiornate.
-        it("Should update balances after transfers", async function () {
+        it("Should update balances after transfers", async () => {
           const initialOwnerBalance: bigint = await gldToken.balanceOf(owner.address);
     
           // Transfer 100 tokens from owner to addr1.
@@ -96,5 +86,5 @@ describe("GLDToken contract", () => {
           const addr2Balance = await gldToken.balanceOf(addr2.address);
           expect(addr2Balance).to.equal(50);
         });
-      });
+    });
 });
