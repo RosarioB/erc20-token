@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Capped.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract GLDToken is ERC20Capped, ERC20Burnable, Ownable {  // ERC20Capped estende già ERC20 quindi non serve estendere ERC20. Invece estendendo ERC20Burnable abbiamo reso automaticamete il token burnable
+contract GLDToken is ERC20Capped, ERC20Burnable, Ownable {
     
     uint internal  constant OWNER_TOKENS = 70_000_000;
     uint internal constant TOKEN_SIZE = 10 ** 18;
