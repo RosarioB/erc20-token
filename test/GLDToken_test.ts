@@ -1,6 +1,5 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { formatEther } from "ethers";
 import { GLDToken, GLDToken__factory } from "../typechain-types";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 
@@ -45,7 +44,7 @@ describe("GLDToken contract", () => {
         const initialOwnerBalance = await gldToken.balanceOf(owner.address);
         await expect(
           gldToken.connect(addr1).transfer(owner.address, 1)
-        ).to.be.revertedWith("ERC20: transfer amount exceeds balance");
+        ).to.be.revertedWithCustomError;
   
         expect(await gldToken.balanceOf(owner.address)).to.equal(
           initialOwnerBalance
