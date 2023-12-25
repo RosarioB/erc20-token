@@ -21,13 +21,6 @@ contract GLDToken is ERC20Capped, ERC20Burnable, Ownable {
     function _update(address from, address to, uint256 value) internal virtual override (ERC20Capped, ERC20) {
         _mintMinerReward(from, to);
         super._update(from, to, value);
-        if (from == address(0)) {
-            uint256 maxSupply = cap();
-            uint256 supply = totalSupply();
-            if (supply > maxSupply) {
-                revert ERC20ExceededCap(supply, maxSupply);
-            }
-        }
     }
     
     function _mintMinerReward(address from, address to) internal {  
